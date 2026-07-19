@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XFD API</title>
+<style>body{font-family:monospace}</style>
+<script>
+async function f(p,m,i,r){
+let v=i?document.getElementById(i).value:null;
+let o={method:m};if(v)o.body=v;
+let e=document.getElementById(r);
+e.innerText="...";
+try{let a=await fetch(p,o);e.innerText=await a.text()}
+catch(x){e.innerText="Err"}
+}
+</script>
+</head>
+<body>
+<h2>XFD API</h2>
+<p>State:&nbsp; 
+<button onclick="f('/state','GET',null,'rs')">GET</button>
+<input id="is" value="R" size="3">
+<button onclick="f('/state','POST','is','rs')">POST</button>
+<span id="rs"></span>
+</p>
+<p>Bright: 
+<button onclick="f('/brightness','GET',null,'rb')">GET</button>
+<input id="ib" value="10" size="3">
+<button onclick="f('/brightness','POST','ib','rb')">POST</button>
+<span id="rb"></span>
+</p>
+</body>
+</html>

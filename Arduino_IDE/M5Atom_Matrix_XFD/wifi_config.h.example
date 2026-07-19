@@ -1,0 +1,8 @@
+#ifndef WIFI_CONFIG_H
+#define WIFI_CONFIG_H
+
+// WiFi設定 (ご自身の環境に合わせて変更してください)
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+#endif
