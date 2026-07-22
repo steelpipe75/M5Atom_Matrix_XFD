@@ -1,6 +1,7 @@
 #include <M5Unified.h>
 #include <FastLED.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <WebServer.h>
 #include "BluetoothSerial.h"
 
@@ -8,6 +9,7 @@
 #define NUM_LEDS    25
 #define RELAY_PIN   26 // Grove端子の黄色の線(G26)
 #define BT_DEVICE_NAME "M5Atom_Matrix_XFD"
+#define MDNS_HOSTNAME  "m5atom-matrix-xfd"
 #define MAX_BRIGHTNESS 20
 #define MIN_BRIGHTNESS 1
 
@@ -205,6 +207,14 @@ void setup() {
   Serial.println("WiFi connected.");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+
+  // mDNSの初期化
+  if (MDNS.begin(MDNS_HOSTNAME)) {
+    Serial.printf("MDNS responder started (http://%s.local)\n", MDNS_HOSTNAME);
+    MDNS.addService("http", "tcp", 80);
+  } else {
+    Serial.println("Error setting up MDNS responder!");
+  }
 
   // WebServerのエンドポイント設定
   server.on("/", HTTP_GET, handleRoot);
