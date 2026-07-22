@@ -198,15 +198,45 @@ void setup() {
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
+
+  // 接続開始前に輝度を5にして黄色に点灯
+  FastLED.setBrightness(5);
+  fill_solid(leds, NUM_LEDS, CRGB::Yellow);
+  FastLED.show();
+
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+
+  unsigned long startAttemptTime = millis();
+  bool ledState = true;
+
+  // 15秒間(15000ms)接続試行
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 15000) {
+    // 点滅処理 (500ms間隔)
+    if (ledState) {
+      fill_solid(leds, NUM_LEDS, CRGB::Black);
+    } else {
+      fill_solid(leds, NUM_LEDS, CRGB::Yellow);
+    }
+    FastLED.show();
+    ledState = !ledState;
+
     delay(500);
     Serial.print(".");
   }
   Serial.println("");
-  Serial.println("WiFi connected.");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+
+  // 接続処理が終わったら元の設定輝度に戻す
+  FastLED.setBrightness(currentBrightness);
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi connected.");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("WiFi connection failed (timeout).");
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+  }
 
   // mDNSの初期化
   if (MDNS.begin(MDNS_HOSTNAME)) {
@@ -225,8 +255,13 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-  // 起動時はIPアドレス表示モード
-  currentMode = MODE_SHOW_IP;
+  // 接続状況に応じて初期モードを決定
+  if (WiFi.status() == WL_CONNECTED) {
+    currentMode = MODE_SHOW_IP;
+  } else {
+    currentMode = MODE_NORMAL;
+    updateState(green); // 現在の状態(通常は赤)をLEDに反映して表示
+  }
 }
 
 void handleSerialInput(Stream& stream) {
